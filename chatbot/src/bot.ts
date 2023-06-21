@@ -1,9 +1,6 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+import { ActivityHandler, MessageFactory } from 'botbuilder';
 
-import { ActivityHandler } from 'botbuilder';
-
-export class EmptyBot extends ActivityHandler {
+export class Botdb extends ActivityHandler {
     constructor() {
         super();
         this.onMembersAdded(async (context, next) => {

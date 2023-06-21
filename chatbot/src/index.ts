@@ -1,25 +1,18 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-import * as restify from 'restify';
-
-// Import required bot services.
-// See https://aka.ms/bot-services to learn more about the different parts of a bot.
 import {
     CloudAdapter,
     ConfigurationServiceClientCredentialFactory,
     createBotFrameworkAuthenticationFromConfiguration
 } from 'botbuilder';
 
-// This bot's main dialog.
-import { EmptyBot } from './bot';
+import { Botdb } from './bot';
 
-// Create HTTP server.
-const server = restify.createServer();
-server.use(restify.plugins.bodyParser());
+const express = require('express');
+const app = express();
+app.use(express.json());
+const port = process.env.port || process.env.PORT || 3978;
 
-server.listen(process.env.port || process.env.PORT || 3978, () => {
-    console.log(`\n${ server.name } listening to ${ server.url }`);
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
 
 const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
@@ -31,15 +24,10 @@ const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
 
 const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
 
-// Create adapter.
-// See https://aka.ms/about-bot-adapter to learn more about adapters.
 const adapter = new CloudAdapter(botFrameworkAuthentication);
 
-// Catch-all for errors.
 adapter.onTurnError = async (context, error) => {
-    // This check writes out errors to console log .vs. app insights.
-    // NOTE: In production environment, you should consider logging this to Azure
-    //       application insights.
+    // This check writes out errors to console log .vs. app insights
     console.error(`\n [onTurnError] unhandled error: ${ error }`);
 
     // Send a trace activity, which will be displayed in Bot Framework Emulator
@@ -56,10 +44,10 @@ adapter.onTurnError = async (context, error) => {
 };
 
 // Create the main dialog.
-const myBot = new EmptyBot();
+const myBot = new Botdb();
 
 // Listen for incoming requests.
-server.post('/api/messages', async (req, res) => {
+app.post('/api/messages', async (req, res) => {
     // Route received a request to adapter for processing
     await adapter.process(req, res, (context) => myBot.run(context));
 });
