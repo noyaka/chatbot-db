@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Client } from './Client';
 
 @Entity()
@@ -12,9 +12,12 @@ export class Message {
     @CreateDateColumn()
     timestamp: Date;
 
-    @OneToOne(() => Client)
-    @JoinColumn()
-    client_id: Client;
+    @ManyToOne(() => Client, (client) => client.messages,
+    { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
+    
+    @Column()
+    client_id: number
 
     @Column({ type: 'boolean', default: false })
     answered: boolean;

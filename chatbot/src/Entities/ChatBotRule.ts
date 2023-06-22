@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Message } from './Message'
+import { Client } from './Client';
 
 @Entity()
 export class ChatBotRule {
@@ -17,4 +18,7 @@ export class ChatBotRule {
 
   @Column({ type: 'text' })
   fail_response: string;
+
+  @OneToMany(() => Client, (client) => client.current_chatbot_rule)
+  clients: Client[]
 }

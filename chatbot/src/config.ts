@@ -5,11 +5,11 @@ import { Message } from "./Entities/Message";
 
 const config: PostgresConnectionOptions  = {
     type: 'postgres',
-    host: process.env.DB_HOST || "localhost",
+    host: process.env.DB_HOST as string || "localhost",
     port: parseInt(process.env.DB_PORT, 10) || 5432,
-    username: process.env.DB_USERNAME || "postgres",
-    password: process.env.DB_PASSWORD || "postgres",
-    database: process.env.DB_NAME || "Botdb",
+    username: process.env.DB_USERNAME as string || "postgres",
+    password: process.env.DB_PASSWORD as string || "postgres",
+    database: process.env.DB_NAME as string || "Botdb",
     synchronize: true,
     logging: true,
     entities: [ChatBotRule, Message, Client],
