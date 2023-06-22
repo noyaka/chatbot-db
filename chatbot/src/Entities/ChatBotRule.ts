@@ -8,7 +8,7 @@ export class ChatBotRule {
   id: number;
 
   @Column({ type: 'jsonb', transformer: { from: (value) => JSON.parse(value), to: (value) => JSON.stringify(value) } })
-  nextrule: Array<{ key: Message, value: number }>;
+  nextrule: Array<{ key: Message | null, value: number }>;
 
   @Column({ type: 'text' })
   response: string;
