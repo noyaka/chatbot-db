@@ -6,10 +6,10 @@ import {
 
 import { Botdb } from './bot';
 import { createChatBotRule, delChatBotRuleById, getAllChatBotRules, getChatBotRuleById } from './Repository/ChatBotRuleRepository';
-import { createClient, delClientById, getAllClients, getClientById, updateClientRule } from './Repository/ClientRepository';
-import { createMessage, delMessageById, getAllMessages, getMessageById, updateMessageAns } from './Repository/MessageRepository';
-
-const express = require('express');
+import express = require('express');
+import ChatBotRuleRoute from './Routes/ChatBotRuleRoute';
+import ClientRoute from './Routes/ClientRoute';
+import MessageRoute from './Routes/MessageRoute';
 const app = express();
 const port = process.env.port || process.env.PORT || 3978;
 
@@ -56,50 +56,11 @@ app.post('/api/messages', async (req, res) => {
     await adapter.process(req, res, (context) => myBot.run(context));
 });
 
-// HTTP REQUESTS FOR CHATBOTRULES
-app.post('/chatbots', (req, res) => {
-    createChatBotRule(req, res);
-});
-app.get('/chatbots', (req, res) => {
-    getAllChatBotRules(req, res);
-});
-app.get('/chatbots/:id', (req, res) => {
-    getChatBotRuleById(req, res);
-});
-app.delete('/chatbots/:id', (req, res) => {
-    delChatBotRuleById(req, res);
-});
+// HTTP REQUESTS FOR ChatBotRuleRoute
+app.use('/chatbots', ChatBotRuleRoute);
 
-// HTTP REQUESTS FOR CLIENTS
-app.post('/clients', (req, res) => {
-    createClient(req, res);
-});
-app.get('/clients', (req, res) => {
-    getAllClients(req, res);
-});
-app.get('/clients/:id', (req, res) => {
-    getClientById(req, res);
-});
-app.delete('/clients/:id', (req, res) => {
-    delClientById(req, res);
-});
-app.put('/clients/:id', (req, res) => {
-    updateClientRule(req, res);
-});
+// HTTP REQUESTS FOR ClientRoute
+app.use('/clients', ClientRoute);
 
-// HTTP REQUESTS FOR MESSAGES
-app.post('/messages', (req, res) => {
-    createMessage(req, res);
-});
-app.get('/messages', (req, res) => {
-    getAllMessages(req, res);
-});
-app.get('/messages/:id', (req, res) => {
-    getMessageById(req, res);
-});
-app.delete('/messages/:id', (req, res) => {
-    delMessageById(req, res);
-});
-app.put('/messages/:id', (req, res) => {
-    updateMessageAns(req, res);
-});
+// HTTP REQUESTS FOR MessageRoute
+app.use('/messages', MessageRoute);

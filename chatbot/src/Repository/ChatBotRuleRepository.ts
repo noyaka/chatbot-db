@@ -1,27 +1,18 @@
-import dataSource from '../config';
-import { ChatBotRule } from './../Entities/ChatBotRule';
+import { createNewChatBotRule, delChatBotRule, getChatBotRule, getChatBotRules } from '../Utils/ChatBotRuleUtils';
 
 export async function createChatBotRule(req, res) {
     try {
-      const chatBotRuleRepository = dataSource.getRepository(ChatBotRule);
-      const chatBotRule = new ChatBotRule();
-      chatBotRule.nextrule = req.body.nextrule;
-      chatBotRule.response = req.body.response;
-      chatBotRule.message_validity_check = req.body.message_validity_check;
-      chatBotRule.fail_response = req.body.fail_response;
-      // Save the chatBotRule to the database
-      await chatBotRuleRepository.save(chatBotRule);
-  
-      res.status(201).json({ message: 'ChatBotRule created successfully', data: chatBotRule });
+        const { nextrule, response, message_validity_check, fail_response } = req.body;
+        const chatBotRule = await createNewChatBotRule(nextrule, response, message_validity_check, fail_response);
+        res.status(201).json({ message: 'ChatBotRule created successfully', data: chatBotRule });
     } catch (error) {
-      res.status(500).json({ error: 'An error occurred while creating the chatBotRule' });
+        res.status(500).json({ error: 'An error occurred while creating the chatBotRule' });
     }
 }
 
 export async function getAllChatBotRules(req, res) {
     try {
-        const chatBotRuleRepository = dataSource.getRepository(ChatBotRule);
-        const chatBotRules = await chatBotRuleRepository.find();
+        const chatBotRules = await getChatBotRules();
         if (chatBotRules.length === 0) {
             return res.status(404).json({ message: 'ChatBotRule not found', data: [] });
         }
@@ -34,29 +25,25 @@ export async function getAllChatBotRules(req, res) {
 export async function getChatBotRuleById(req, res) {
     try {
         const { id } = req.params;
-        const chatBotRuleRepository = dataSource.getRepository(ChatBotRule);
-        const chatBotRule = await chatBotRuleRepository.findOne({where: {id: id}});
+        const chatBotRule = await getChatBotRule(id);
         if (!chatBotRule) {
             return res.status(404).json({ error: 'ChatBotRule not found' });
         }
         res.status(200).json({ message: 'ChatBotRule retrieved successfully', data: chatBotRule });
     } catch (error) {
-        console.log(error);
-    res.status(500).json({ error: 'An error occurred while getting the chatBotRule' });
+        res.status(500).json({ error: 'An error occurred while getting the chatBotRule' });
     }
 }
 
 export async function delChatBotRuleById(req, res) {
     try {
         const { id } = req.params;
-        const chatBotRuleRepository = dataSource.getRepository(ChatBotRule);
-        const chatBotRule = await chatBotRuleRepository.findOne({where: {id: id}});
+        const chatBotRule = await delChatBotRule(id);
         if (!chatBotRule) {
             return res.status(404).json({ error: 'ChatBotRule not found' });
         }
-        await chatBotRuleRepository.remove(chatBotRule);
         res.status(200).json({ message: 'ChatBotRule deleted successfully', data: chatBotRule });
     } catch (error) {
-    res.status(500).json({ error: 'An error occurred while deleting the chatBotRule' });
+        res.status(500).json({ error: 'An error occurred while deleting the chatBotRule' });
     }
 }
