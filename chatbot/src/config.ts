@@ -1,26 +1,22 @@
+import { config } from 'dotenv';
 import { ChatBotRule } from "./Entities/ChatBotRule";
 import { Client } from "./Entities/Client";
 import { Message } from "./Entities/Message";
 import { DataSource } from "typeorm";
 
-const path = require('path');
-const dotenv = require('dotenv');
-const ENV_FILE = path.join(__dirname, '.env');
-dotenv.config({ path: ENV_FILE });
-
-const dataSource = new DataSource({
+// const ENV_FILE = path.join(__dirname, '.env');
+// dotenv.config({ path: ENV_FILE });
+const dataSource = new DataSource({ 
     type: 'postgres',
-    host: process.env.DB_HOST|| "localhost",
-    port: parseInt(process.env.DB_PORT, 10) || 5432,
-    username: process.env.DB_USERNAME|| "postgres",
-    password: process.env.DB_PASSWORD || "postgres",
-    database: process.env.DB_NAME || "Botdb",
-    synchronize: true,
-    logging: true,
-    entities: [ChatBotRule, Message, Client],
-    subscribers: [],
-    migrations: []
-});
+    host: process.env.DB_HOST || "psqldb.postgres.database.azure.com", 
+    port: parseInt(process.env.DB_PORT, 10) || 5432, 
+    username: process.env.DB_USERNAME || "postgres", 
+    password: process.env.DB_PASSWORD || "psqlDB14", 
+    database: process.env.DB_NAME || "postgres", 
+    entities: [ChatBotRule, Message, Client], 
+    synchronize: true, 
+    logging: true
+})
 
 dataSource.initialize()
     .then(() => {

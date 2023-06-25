@@ -11,7 +11,7 @@ export class Client {
     { onDelete: 'CASCADE'})
     @JoinColumn({ name: 'current_chatbot_rule', referencedColumnName: 'id' })
 
-    @Column({ default: 10 })
+    @Column({ default: 1 })
     current_chatbot_rule: number;
 
     @OneToMany(() => Message, (message) => message.client_id)
