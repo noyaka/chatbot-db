@@ -8,8 +8,7 @@ export async function createMessage(req, res) {
     } catch (error) {
       res.status(500).json({ error: 'An error occurred while creating the message' });
     }
-  }
-
+}
 
 export async function getAllMessages(req, res) {
     try {
@@ -52,8 +51,7 @@ export async function delMessageById(req, res) {
 export async function updateMessageAns(req, res) {
     try {
         const { id } = req.params;
-        const { answered } = req.body;
-        const message = await updateMessage(id, answered);
+        const message = await updateMessage(id);
         if (!message) {
             return res.status(404).json({ error: 'Message not found' });
         }

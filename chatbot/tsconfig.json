@@ -9,6 +9,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./lib/.tsbuildinfo",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "lib": ["ES2021.String"]
   }
 }

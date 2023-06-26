@@ -56,14 +56,14 @@ export async function delMessage(id: number) {
     }
 }
 
-export async function updateMessage(id: number, answered: boolean) {
+export async function updateMessage(id: number) {
     try {
         const messageRepository = dataSource.getRepository(Message);
         const message = await messageRepository.findOne({where: {id: id}});
         if (!message) {
             throw new Error('Message not found');
         }
-        message.answered = answered;
+        message.answered = true;
         await messageRepository.save(message);
         return message;
     } catch (error) {

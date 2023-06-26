@@ -1,8 +1,9 @@
-import { config } from 'dotenv';
 import { ChatBotRule } from "./Entities/ChatBotRule";
 import { Client } from "./Entities/Client";
 import { Message } from "./Entities/Message";
 import { DataSource } from "typeorm";
+import path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
 const dataSource = new DataSource({ 
     type: 'postgres',

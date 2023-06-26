@@ -3,7 +3,7 @@ import { Client } from '../Entities/Client';
 import { Message } from '../Entities/Message';
 import dataSource from '../config';
 
-export async function createNewChatBotRule(nextrule: Array<{ key: Message | null, value: number }>, response: string, message_validity_check: string, fail_response: string) {
+export async function createNewChatBotRule(nextrule: JSON, response: string, message_validity_check: string, fail_response: string) {
     try {
         const chatBotRuleRepository = dataSource.getRepository(ChatBotRule);
         const chatBotRule = new ChatBotRule();
@@ -61,17 +61,18 @@ export async function getNextChatBotRule(client: Client, message: Message) {
     try {
         let currChatBotRuleId = client.current_chatbot_rule;
         const chatBotRule = await getChatBotRule(currChatBotRuleId);
-        if(Array(chatBotRule.nextrule).length == 1) {
-            const pair = Object.values(chatBotRule.nextrule)[0];
-            let num: number;
-            if (pair) num = pair.value;
-
-            currChatBotRuleId = num;
-            if (!currChatBotRuleId){ currChatBotRuleId=2}
+        const entries = Object.entries(chatBotRule.nextrule);
+        if(entries.length === 1) {
+            const pair = entries[0];
+            const nextId: number =  parseInt(pair[1]);
+            currChatBotRuleId = nextId;
         }
         else {
-            const result = (chatBotRule).nextrule.find(item => item.key == message);
-            currChatBotRuleId = result.value;
+            const result = entries.find(([key]) => key === message.content);
+            if (result) {
+                const nextId: number =  parseInt(result[1]);
+                currChatBotRuleId = nextId;
+            }
         }
         return currChatBotRuleId;
     } catch (error) {

@@ -3,15 +3,17 @@ import {
     ConfigurationServiceClientCredentialFactory,
     createBotFrameworkAuthenticationFromConfiguration
 } from 'botbuilder';
-
 import { Botdb } from './bot';
-import { createChatBotRule, delChatBotRuleById, getAllChatBotRules, getChatBotRuleById } from './Repository/ChatBotRuleRepository';
+import { MemoryStorage, UserState, ConversationState } from 'botbuilder';
 import express = require('express');
 import ChatBotRuleRoute from './Routes/ChatBotRuleRoute';
 import ClientRoute from './Routes/ClientRoute';
 import MessageRoute from './Routes/MessageRoute';
+import path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
+
 const app = express();
-const port = process.env.port || process.env.PORT || 3978;
+const port = process.env.PORT;
 
 app.use(express.json());
 
@@ -25,6 +27,11 @@ const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
     MicrosoftAppType: process.env.MicrosoftAppType,
     MicrosoftAppTenantId: process.env.MicrosoftAppTenantId
 });
+
+// set up users states
+const memoryStorage = new MemoryStorage();
+const userState = new UserState(memoryStorage);
+const conversationState = new ConversationState(memoryStorage);
 
 const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
 
@@ -47,8 +54,17 @@ adapter.onTurnError = async (context, error) => {
     await context.sendActivity('To continue to run this bot, please fix the bot source code.');
 };
 
+adapter.use(async (context, next) => {
+    // apply state middleware
+    await userState.load(context);
+    await conversationState.load(context);
+    await next();
+    await userState.saveChanges(context);
+    await conversationState.saveChanges(context);
+  });
+
 // Create the main dialog.
-const myBot = new Botdb();
+const myBot = new Botdb(userState, conversationState);
 
 // Listen for incoming requests.
 app.post('/api/messages', async (req, res) => {
