@@ -1,7 +1,7 @@
 import { ActivityHandler, ConversationState, MessageFactory, StatePropertyAccessor, UserState } from 'botbuilder';
 import { UserProfile } from './StateType/UserProfile';
 import { Client } from './Entities/Client';
-import { getChatBotRule, getChatBotRules, getNextChatBotRule } from './Utils/ChatBotRuleUtils';
+import { getChatBotRule, getNextChatBotRule } from './Utils/ChatBotRuleUtils';
 import { createNewClient, updateClient } from './Utils/ClientUtils';
 import { createNewMessage, updateMessage } from './Utils/MessageUtils';
 import { ConversationData } from './StateType/ConversationData';
@@ -54,7 +54,7 @@ export class Botdb extends ActivityHandler {
             
             let replyText: string;
             if(isValid){
-                const nextRuleId = await getNextChatBotRule(currclient, message);
+                const nextRuleId = await getNextChatBotRule(currChatBotRule, message);
                 currclient = await updateClient(currclient.id, nextRuleId);
                 message = await updateMessage(message.id);
                 replyText = (await getChatBotRule(nextRuleId)).response;
@@ -78,9 +78,8 @@ export class Botdb extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (const member of membersAdded) {
                 if (member.id !== context.activity.recipient.id) {
-                    const chatBotRules = await getChatBotRules();
-                    const firstBotMessage = `${chatBotRules[0].response}`;
-                    await context.sendActivity(firstBotMessage);
+                    const welcomeMessage = process.env.WELCOME_MESSAGE;
+                    await context.sendActivity(welcomeMessage);
                 }
             }
             // By calling next() you ensure that the next BotHandler is run.

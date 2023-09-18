@@ -1,5 +1,4 @@
 import { ChatBotRule } from './../Entities/ChatBotRule';
-import { Client } from '../Entities/Client';
 import { Message } from '../Entities/Message';
 import dataSource from '../config';
 
@@ -56,11 +55,9 @@ export async function delChatBotRule(id: number) {
         throw new Error('An error occurred while deleting the chatBotRule');
     }
 }
-
-export async function getNextChatBotRule(client: Client, message: Message) {
+export async function getNextChatBotRule(chatBotRule: ChatBotRule, message: Message) {
     try {
-        let currChatBotRuleId = client.current_chatbot_rule;
-        const chatBotRule = await getChatBotRule(currChatBotRuleId);
+        let currChatBotRuleId = chatBotRule.id;
         const entries = Object.entries(chatBotRule.nextrule);
         if(entries.length === 1) {
             const pair = entries[0];
