@@ -52,10 +52,9 @@ export async function delClient(id: number) {
     }
 }
 
-export async function updateClient(id: number, current_chatbot_rule: number) {
+export async function updateClient(client: Client, current_chatbot_rule: number) {
     try {
         const clientRepository = dataSource.getRepository(Client);
-        let client = await clientRepository.findOne({where: {id: id}});
         if (!client) {
             throw new Error('Client not found');
         }

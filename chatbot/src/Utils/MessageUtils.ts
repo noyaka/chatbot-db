@@ -55,18 +55,3 @@ export async function delMessage(id: number) {
         throw new Error('An error occurred while deleting the message');
     }
 }
-
-export async function updateMessage(id: number) {
-    try {
-        const messageRepository = dataSource.getRepository(Message);
-        const message = await messageRepository.findOne({where: {id: id}});
-        if (!message) {
-            throw new Error('Message not found');
-        }
-        message.answered = true;
-        await messageRepository.save(message);
-        return message;
-    } catch (error) {
-        throw new Error('An error occurred while updating the message');
-    }
-}

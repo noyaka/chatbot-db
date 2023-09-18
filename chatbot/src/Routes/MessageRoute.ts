@@ -1,4 +1,4 @@
-import { createMessage, getAllMessages, getMessageById, delMessageById, updateMessageAns } from '../Repository/MessageRepository';
+import { createMessage, getAllMessages, getMessageById, delMessageById } from '../Repository/MessageRepository';
 import express = require('express');
 
 const router = express.Router();
@@ -14,9 +14,6 @@ router.get('/:id', async (req, res) => {
 });
 router.delete('/:id', async (req, res) => {
     await delMessageById(req, res);
-});
-router.put('/:id', async (req, res) => {
-    await updateMessageAns(req, res);
 });
 
 export default router;

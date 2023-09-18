@@ -18,7 +18,4 @@ export class Message {
     
     @Column()
     client_id: number
-
-    @Column({ type: 'boolean', default: false })
-    answered: boolean;
 }

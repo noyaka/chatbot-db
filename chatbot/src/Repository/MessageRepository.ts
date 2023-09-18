@@ -1,4 +1,4 @@
-import { createNewMessage, delMessage, getMessage, getMessages, updateMessage } from '../Utils/MessageUtils';
+import { createNewMessage, delMessage, getMessage, getMessages } from '../Utils/MessageUtils';
 
 export async function createMessage(req, res) {
     try {
@@ -45,18 +45,5 @@ export async function delMessageById(req, res) {
         res.status(200).json({ message: 'Message deleted successfully', data: message });
     } catch (error) {
     res.status(500).json({ error: 'An error occurred while deleting the message' });
-    }
-}
-
-export async function updateMessageAns(req, res) {
-    try {
-        const { id } = req.params;
-        const message = await updateMessage(id);
-        if (!message) {
-            return res.status(404).json({ error: 'Message not found' });
-        }
-        res.status(200).json({ message: 'Message updated successfully', data: message });
-    } catch (error) {
-    res.status(500).json({ error: 'An error occurred while updating the message' });
     }
 }

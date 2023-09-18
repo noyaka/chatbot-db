@@ -3,7 +3,7 @@ import { UserProfile } from './StateType/UserProfile';
 import { Client } from './Entities/Client';
 import { getChatBotRule, getNextChatBotRule } from './Utils/ChatBotRuleUtils';
 import { createNewClient, updateClient } from './Utils/ClientUtils';
-import { createNewMessage, updateMessage } from './Utils/MessageUtils';
+import { createNewMessage } from './Utils/MessageUtils';
 import { ConversationData } from './StateType/ConversationData';
 import { checkRegex } from './Utils/Regex';
 
@@ -46,17 +46,16 @@ export class Botdb extends ActivityHandler {
                 await this.conversationDataAccessor.set(context, conversationData);
             }
 
-            let message = await createNewMessage(context.activity.text, new Date(), currclient.id);
             const currChatBotRule = await getChatBotRule(currclient.current_chatbot_rule);
             
             // check if client input is valid
-            const isValid = await checkRegex(currChatBotRule.message_validity_check, message.content)
+            const isValid = await checkRegex(currChatBotRule.message_validity_check, context.activity.text)
             
             let replyText: string;
             if(isValid){
+                let message = await createNewMessage(context.activity.text, new Date(), currclient.id);
                 const nextRuleId = await getNextChatBotRule(currChatBotRule, message);
-                currclient = await updateClient(currclient.id, nextRuleId);
-                message = await updateMessage(message.id);
+                currclient = await updateClient(currclient, nextRuleId);
                 replyText = (await getChatBotRule(nextRuleId)).response;
 
                 // save the updated client
