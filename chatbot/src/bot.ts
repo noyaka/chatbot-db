@@ -1,11 +1,12 @@
 import { ActivityHandler, ConversationState, MessageFactory, StatePropertyAccessor, UserState } from 'botbuilder';
 import { UserProfile } from './StateType/UserProfile';
-import { Client } from './Entities/Client';
+import { ConversationData } from './StateType/ConversationData';
 import { getChatBotRule, getNextChatBotRule } from './Utils/ChatBotRuleUtils';
 import { createNewClient, updateClient } from './Utils/ClientUtils';
-import { createNewMessage } from './Utils/MessageUtils';
-import { ConversationData } from './StateType/ConversationData';
+import { createNewMessage, saveMessages } from './Utils/MessageUtils';
 import { checkRegex } from './Utils/Regex';
+import { Message } from './Entities/Message';
+import { Client } from './Entities/Client';
 
 const USER_PROFILE_PROPERTY = 'userProfile';
 const CONVERSATION_DATA_PROPERTY = 'conversationData';
@@ -18,61 +19,54 @@ export class Botdb extends ActivityHandler {
 
     constructor(userState: UserState, conversationState: ConversationState) {   
         super();
-        // state for save clients states
         this.userState = userState;
         this.conversationState = conversationState;
         this.userProfileAccessor = this.userState.createProperty(USER_PROFILE_PROPERTY);
         this.conversationDataAccessor = this.conversationState.createProperty(CONVERSATION_DATA_PROPERTY);
 
         this.onMessage(async (context, next) => {
+            let currclient: Client;
             let userProfile: UserProfile = await this.userProfileAccessor.get(context);
             let conversationData: ConversationData = await this.conversationDataAccessor.get(context);
 
             if (!userProfile || !userProfile.client) {
-                if (conversationData && conversationData.client && conversationData.client.id) {
-                    userProfile = { client: conversationData.client };
-                } else {
-                    const client = await createNewClient();
-                    userProfile = { client: client };
-                }
-                await this.userProfileAccessor.set(context, userProfile); 
-            }
-            let currclient: Client;
-            if (conversationData && conversationData.client) {
-                currclient = conversationData.client;
+                    currclient = await createNewClient();
+                    userProfile = { client: currclient };
+                    conversationData = { client: currclient, messages: [] as Message[] };
             } else {
                 currclient = userProfile.client;
-                conversationData = { client: currclient };
-                await this.conversationDataAccessor.set(context, conversationData);
             }
+            
+            await this.userProfileAccessor.set(context, userProfile); 
+            await this.conversationDataAccessor.set(context, conversationData);
 
             const currChatBotRule = await getChatBotRule(currclient.current_chatbot_rule);
-            
-            // check if client input is valid
             const isValid = await checkRegex(currChatBotRule.message_validity_check, context.activity.text)
             
-            let replyText: string;
+            let nextChatBotRule = currChatBotRule;
+            let endOfConversation: Boolean;
+            let replyText = currChatBotRule.fail_response;
             if(isValid){
                 let message = await createNewMessage(context.activity.text, new Date(), currclient.id);
                 const nextRuleId = await getNextChatBotRule(currChatBotRule, message);
-                currclient = await updateClient(currclient, nextRuleId);
-                replyText = (await getChatBotRule(nextRuleId)).response;
+                nextChatBotRule = await getChatBotRule(nextRuleId);
+                endOfConversation = nextChatBotRule.fail_response == '';
+                replyText = nextChatBotRule.response;
 
-                // save the updated client
-                userProfile = { client: currclient };
-                conversationData = { client: currclient };
-                await this.userProfileAccessor.set(context, userProfile); 
-                await this.conversationDataAccessor.set(context, conversationData);
-            } else {
-                replyText = currChatBotRule.fail_response;
+                conversationData.messages.push(message);
+
+                currclient = await updateClient(currclient, nextRuleId);
             }
 
             await context.sendActivity(MessageFactory.text(replyText, replyText));
             
-            // By calling next() you ensure that the next BotHandler is run
+            if (endOfConversation) {
+                await saveMessages(conversationData.messages);
+                conversationData.messages = [];
+            }
             await next();
         })
-        // when a user is added to chat
+
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
             for (const member of membersAdded) {
@@ -81,7 +75,6 @@ export class Botdb extends ActivityHandler {
                     await context.sendActivity(welcomeMessage);
                 }
             }
-            // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
     }

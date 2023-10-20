@@ -3,13 +3,11 @@ import dataSource from "../config";
 
 export async function createNewMessage(content: string, timestamp: Date, client_id: number) {
     try {
-        const messageRepository = dataSource.getRepository(Message);
         const message = new Message();
         message.content = content;
         message.timestamp = timestamp;
         message.client_id = client_id;
   
-        await messageRepository.save(message);
         return message;
     } catch (error) {
         throw new Error('An error occurred while creating the message' );
@@ -53,5 +51,14 @@ export async function delMessage(id: number) {
         return message;
     } catch (error) {
         throw new Error('An error occurred while deleting the message');
+    }
+}
+
+export async function saveMessages(messages: Message[]) {
+    try {
+        const messageRepository = dataSource.getRepository(Message);
+        await messageRepository.insert(messages);
+    } catch (error) {
+        throw new Error('An error occurred while getting the message');
     }
 }

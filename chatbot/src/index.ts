@@ -28,7 +28,6 @@ const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
     MicrosoftAppTenantId: process.env.MicrosoftAppTenantId
 });
 
-// set up users states
 const memoryStorage = new MemoryStorage();
 const userState = new UserState(memoryStorage);
 const conversationState = new ConversationState(memoryStorage);
@@ -38,10 +37,8 @@ const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfigura
 const adapter = new CloudAdapter(botFrameworkAuthentication);
 
 adapter.onTurnError = async (context, error) => {
-    // This check writes out errors to console log .vs. app insights
     console.error(`\n [onTurnError] unhandled error: ${ error }`);
 
-    // Send a trace activity, which will be displayed in Bot Framework Emulator
     await context.sendTraceActivity(
         'OnTurnError Trace',
         `${ error }`,
@@ -49,13 +46,11 @@ adapter.onTurnError = async (context, error) => {
         'TurnError'
     );
 
-    // Send a message to the user
     await context.sendActivity('The bot encountered an error or bug.');
     await context.sendActivity('To continue to run this bot, please fix the bot source code.');
 };
 
 adapter.use(async (context, next) => {
-    // apply state middleware
     await userState.load(context);
     await conversationState.load(context);
     await next();
@@ -63,20 +58,12 @@ adapter.use(async (context, next) => {
     await conversationState.saveChanges(context);
   });
 
-// Create the main dialog.
 const myBot = new Botdb(userState, conversationState);
 
-// Listen for incoming requests.
 app.post('/api/messages', async (req, res) => {
-    // Route received a request to adapter for processing
     await adapter.process(req, res, (context) => myBot.run(context));
 });
 
-// HTTP REQUESTS FOR ChatBotRuleRoute
 app.use('/chatbots', ChatBotRuleRoute);
-
-// HTTP REQUESTS FOR ClientRoute
 app.use('/clients', ClientRoute);
-
-// HTTP REQUESTS FOR MessageRoute
 app.use('/messages', MessageRoute);
